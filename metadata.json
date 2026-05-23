@@ -1,0 +1,6 @@
+{
+  "name": "Music Smart Link Studio",
+  "description": "A modern smart link manager for artists to share music release links, view analytics, and customize profiles.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
