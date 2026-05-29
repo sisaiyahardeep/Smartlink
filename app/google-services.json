@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "502326334271",
+    "project_id": "music-smart-link-studio",
+    "storage_bucket": "music-smart-link-studio.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:502326334271:android:e1be364b49cb2e76fa37va",
+        "android_client_info": {
+          "package_name": "com.aistudio.musicsmartlink.twkxqz"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyPlaceholderKeyForMusicSmartLinkConnect"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

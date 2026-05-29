@@ -739,6 +739,50 @@ fun AnalyticsView(
         data
     }
 
+    val countryNames = remember {
+        mapOf(
+            "US" to Pair("United States", "🇺🇸"),
+            "GB" to Pair("United Kingdom", "🇬🇧"),
+            "IN" to Pair("India", "🇮🇳"),
+            "DE" to Pair("Germany", "🇩🇪"),
+            "BR" to Pair("Brazil", "🇧🇷"),
+            "JP" to Pair("Japan", "🇯🇵"),
+            "CA" to Pair("Canada", "🇨🇦"),
+            "AU" to Pair("Australia", "🇦🇺")
+        )
+    }
+
+    val countryCounts = remember(clicks) {
+        val map = mutableMapOf<String, Int>()
+        clicks.forEach { 
+            val country = it.country.takeIf { c -> c.isNotEmpty() } ?: "US"
+            map[country] = (map[country] ?: 0) + 1 
+        }
+        map.toList().sortedByDescending { it.second }.take(5)
+    }
+
+    val ageGroupCounts = remember(clicks) {
+        val map = mutableMapOf<String, Int>()
+        clicks.forEach { 
+            val age = it.ageGroup.takeIf { a -> a.isNotEmpty() } ?: "18-24"
+            map[age] = (map[age] ?: 0) + 1 
+        }
+        listOf("13-17", "18-24", "25-34", "35-44", "45+").map { age ->
+            age to (map[age] ?: 0)
+        }
+    }
+
+    val genderCounts = remember(clicks) {
+        val map = mutableMapOf<String, Int>()
+        clicks.forEach { 
+            val g = it.gender.takeIf { g -> g.isNotEmpty() } ?: "Unspecified"
+            map[g] = (map[g] ?: 0) + 1 
+        }
+        listOf("Female", "Male", "Non-binary").map { gender ->
+            gender to (map[gender] ?: 0)
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -844,6 +888,257 @@ fun AnalyticsView(
                             brandColor = brandColor
                         )
                         Spacer(modifier = Modifier.height(12.dp))
+                    }
+                }
+            }
+        }
+
+        // Audience Geography Card
+        Card(
+            colors = CardDefaults.cardColors(containerColor = Color.Transparent),
+            modifier = Modifier
+                .fillMaxWidth()
+                .glassCard(cornerRadius = 24.dp, borderAlpha = 0.15f, bgAlpha = 0.07f)
+                .padding(18.dp)
+        ) {
+            Column {
+                Text(
+                    text = "Audience Geography",
+                    color = Color.White,
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(bottom = 14.dp)
+                )
+
+                if (countryCounts.isEmpty()) {
+                    Text(
+                        text = "No geographical data available yet.",
+                        color = Color.White.copy(alpha = 0.4f),
+                        fontSize = 12.sp,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 12.dp)
+                    )
+                } else {
+                    val maxCountryCount = max(countryCounts.first().second, 1)
+                    val totalCountryClicks = countryCounts.sumOf { it.second }
+                    countryCounts.forEach { (countryCode, count) ->
+                        val countryInfo = countryNames[countryCode] ?: Pair("Unknown Country", "🌐")
+                        val percentage = count.toFloat() / maxCountryCount.toFloat()
+                        val rawPercentage = if (totalCountryClicks > 0) (count * 100 / totalCountryClicks) else 0
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = countryInfo.second,
+                                fontSize = 18.sp,
+                                modifier = Modifier.padding(end = 10.dp)
+                            )
+                            Column(modifier = Modifier.weight(1f)) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(
+                                        text = countryInfo.first,
+                                        color = Color.White.copy(alpha = 0.85f),
+                                        fontSize = 12.sp,
+                                        fontWeight = FontWeight.SemiBold
+                                    )
+                                    Text(
+                                        text = "$count clicks ($rawPercentage%)",
+                                        color = Color.White,
+                                        fontSize = 12.sp,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
+                                Spacer(modifier = Modifier.height(6.dp))
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(6.dp)
+                                        .clip(CircleShape)
+                                        .background(Color.White.copy(alpha = 0.06f))
+                                ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth(percentage)
+                                            .fillMaxHeight()
+                                            .clip(CircleShape)
+                                            .background(GlassBlue)
+                                    )
+                                }
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
+                }
+            }
+        }
+
+        // Listener Demographics Card
+        Card(
+            colors = CardDefaults.cardColors(containerColor = Color.Transparent),
+            modifier = Modifier
+                .fillMaxWidth()
+                .glassCard(cornerRadius = 24.dp, borderAlpha = 0.15f, bgAlpha = 0.07f)
+                .padding(18.dp)
+        ) {
+            Column {
+                Text(
+                    text = "Listener Demographics",
+                    color = Color.White,
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(bottom = 16.dp)
+                )
+
+                Text(
+                    text = "AGE GROUPS BREAKDOWN",
+                    color = Color.White.copy(alpha = 0.5f),
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 0.8.sp,
+                    modifier = Modifier.padding(bottom = 12.dp)
+                )
+
+                val maxAgeCount = max(ageGroupCounts.maxOfOrNull { it.second } ?: 1, 1)
+                ageGroupCounts.forEach { (ageBucket, count) ->
+                    val percentage = count.toFloat() / maxAgeCount.toFloat()
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = ageBucket,
+                            color = Color.White.copy(alpha = 0.8f),
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Medium,
+                            modifier = Modifier.width(55.dp)
+                        )
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(16.dp)
+                                .clip(RoundedCornerShape(4.dp))
+                                .background(Color.White.copy(alpha = 0.05f))
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth(percentage)
+                                    .fillMaxHeight()
+                                    .clip(RoundedCornerShape(4.dp))
+                                    .background(GlassPurple.copy(alpha = 0.8f))
+                                    .padding(horizontal = 6.dp),
+                                contentAlignment = Alignment.CenterEnd
+                            ) {
+                                if (count > 0) {
+                                    Text(
+                                        text = "$count",
+                                        color = Color.White,
+                                        fontSize = 10.sp,
+                                        fontWeight = FontWeight.Black
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+
+                HorizontalDivider(
+                    color = Color.White.copy(alpha = 0.1f),
+                    modifier = Modifier.padding(vertical = 16.dp)
+                )
+
+                Text(
+                    text = "GENDER IDENTITY RATIO",
+                    color = Color.White.copy(alpha = 0.5f),
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 0.8.sp,
+                    modifier = Modifier.padding(bottom = 12.dp)
+                )
+
+                val totalGenders = genderCounts.sumOf { it.second }
+                if (totalGenders == 0) {
+                    Text(
+                        text = "No interaction data recorded.",
+                        color = Color.White.copy(alpha = 0.4f),
+                        fontSize = 12.sp,
+                        modifier = Modifier.padding(vertical = 8.dp)
+                    )
+                } else {
+                    val femaleCount = genderCounts.find { it.first == "Female" }?.second ?: 0
+                    val maleCount = genderCounts.find { it.first == "Male" }?.second ?: 0
+                    val nbCount = genderCounts.find { it.first == "Non-binary" }?.second ?: 0
+
+                    val femalePct = femaleCount.toFloat() / totalGenders.toFloat()
+                    val malePct = maleCount.toFloat() / totalGenders.toFloat()
+                    val nbPct = nbCount.toFloat() / totalGenders.toFloat()
+
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(18.dp)
+                            .clip(RoundedCornerShape(6.dp))
+                            .background(Color.White.copy(alpha = 0.05f))
+                    ) {
+                        Row(modifier = Modifier.fillMaxSize()) {
+                            if (femalePct > 0f) {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxHeight()
+                                        .weight(femalePct)
+                                        .background(GlassPink)
+                                )
+                            }
+                            if (malePct > 0f) {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxHeight()
+                                        .weight(malePct)
+                                        .background(GlassPurple)
+                                )
+                            }
+                            if (nbPct > 0f) {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxHeight()
+                                        .weight(nbPct)
+                                        .background(GlassTeal)
+                                )
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(14.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        LegendItem(
+                            label = "Female",
+                            count = femaleCount,
+                            percent = (femalePct * 100).toInt(),
+                            color = GlassPink
+                        )
+                        LegendItem(
+                            label = "Male",
+                            count = maleCount,
+                            percent = (malePct * 100).toInt(),
+                            color = GlassPurple
+                        )
+                        LegendItem(
+                            label = "Non-binary",
+                            count = nbCount,
+                            percent = (nbPct * 100).toInt(),
+                            color = GlassTeal
+                        )
                     }
                 }
             }
@@ -1212,5 +1507,36 @@ fun EmptyStateView(
             lineHeight = 18.sp,
             modifier = Modifier.padding(horizontal = 16.dp)
         )
+    }
+}
+
+@Composable
+fun LegendItem(
+    label: String,
+    count: Int,
+    percent: Int,
+    color: Color
+) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Box(
+            modifier = Modifier
+                .size(10.dp)
+                .clip(CircleShape)
+                .background(color)
+        )
+        Spacer(modifier = Modifier.width(6.dp))
+        Column {
+            Text(
+                text = "$percent% $label",
+                color = Color.White.copy(alpha = 0.9f),
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Bold
+            )
+            Text(
+                text = "($count active)",
+                color = Color.White.copy(alpha = 0.4f),
+                fontSize = 9.sp
+            )
+        }
     }
 }

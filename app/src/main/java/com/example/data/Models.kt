@@ -39,5 +39,8 @@ data class ClickAnalytic(
     val platformName: String, // "Spotify", "Apple Music", "YouTube Music", "Amazon Music", "Deezer", "JioSaavn"
     val timestamp: Long = System.currentTimeMillis(),
     val deviceType: String = "Mobile", // Mobile, Desktop, Tablet
-    val browser: String = "In-App"
+    val browser: String = "In-App",
+    val country: String = "US",
+    val ageGroup: String = "18-24",
+    val gender: String = "Unspecified"
 )

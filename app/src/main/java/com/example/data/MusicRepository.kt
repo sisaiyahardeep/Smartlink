@@ -110,11 +110,18 @@ class MusicRepository(private val musicDao: MusicDao) {
         val deviceType = if (isTablet) "Tablet" else "Mobile"
         val browsers = listOf("Chrome Mobile", "Safari Mobile", "Firefox Focus", "Android Webview")
         
+        val countries = listOf("US", "GB", "IN", "DE", "BR", "JP", "CA", "AU")
+        val ageGroups = listOf("13-17", "18-24", "25-34", "35-44", "45+")
+        val genders = listOf("Female", "Male", "Non-binary")
+
         val click = ClickAnalytic(
             smartLinkId = smartLinkId,
             platformName = platform,
             deviceType = deviceType,
-            browser = browsers.random()
+            browser = browsers.random(),
+            country = countries.random(),
+            ageGroup = ageGroups.random(),
+            gender = genders.random()
         )
         musicDao.insertClick(click)
     }
@@ -194,6 +201,28 @@ class MusicRepository(private val musicDao: MusicDao) {
                     else -> "Tablet"
                 }
 
+                val country = when {
+                    Random.nextFloat() < 0.45f -> "US"
+                    Random.nextFloat() < 0.65f -> "IN"
+                    Random.nextFloat() < 0.80f -> "GB"
+                    Random.nextFloat() < 0.90f -> "DE"
+                    else -> listOf("BR", "JP", "CA", "AU").random()
+                }
+
+                val ageGroup = when {
+                    Random.nextFloat() < 0.10f -> "13-17"
+                    Random.nextFloat() < 0.55f -> "18-24"
+                    Random.nextFloat() < 0.85f -> "25-34"
+                    Random.nextFloat() < 0.95f -> "35-44"
+                    else -> "45+"
+                }
+
+                val gender = when {
+                    Random.nextFloat() < 0.48f -> "Female"
+                    Random.nextFloat() < 0.92f -> "Male"
+                    else -> "Non-binary"
+                }
+
                 // Random timestamp in the last 7 days
                 val ago = Random.nextLong(1000 * 60 * 60 * 24 * 7)
                 musicDao.insertClick(ClickAnalytic(
@@ -201,7 +230,10 @@ class MusicRepository(private val musicDao: MusicDao) {
                     platformName = platform,
                     timestamp = System.currentTimeMillis() - ago,
                     deviceType = dev,
-                    browser = browsers.random()
+                    browser = browsers.random(),
+                    country = country,
+                    ageGroup = ageGroup,
+                    gender = gender
                 ))
             }
 
@@ -217,13 +249,37 @@ class MusicRepository(private val musicDao: MusicDao) {
                 }
 
                 val dev = if (Random.nextFloat() < 0.85f) "Mobile" else "Tablet"
+
+                val country = when {
+                    Random.nextFloat() < 0.50f -> "US"
+                    Random.nextFloat() < 0.70f -> "IN"
+                    Random.nextFloat() < 0.85f -> "GB"
+                    else -> listOf("BR", "JP", "DE").random()
+                }
+
+                val ageGroup = when {
+                    Random.nextFloat() < 0.15f -> "13-17"
+                    Random.nextFloat() < 0.60f -> "18-24"
+                    Random.nextFloat() < 0.85f -> "25-34"
+                    else -> "35-44"
+                }
+
+                val gender = when {
+                    Random.nextFloat() < 0.45f -> "Female"
+                    Random.nextFloat() < 0.90f -> "Male"
+                    else -> "Non-binary"
+                }
+
                 val ago = Random.nextLong(1000 * 60 * 60 * 24 * 3)
                 musicDao.insertClick(ClickAnalytic(
                     smartLinkId = track2Id,
                     platformName = platform,
                     timestamp = System.currentTimeMillis() - ago,
                     deviceType = dev,
-                    browser = browsers.random()
+                    browser = browsers.random(),
+                    country = country,
+                    ageGroup = ageGroup,
+                    gender = gender
                 ))
             }
         }
